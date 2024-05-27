@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'write_post.dart';
 
-class FreeBoardPage extends StatefulWidget {
-  @override
-  _FreeBoardPageState createState() => _FreeBoardPageState();
-}
+class FreeBoardPage extends StatelessWidget {
+  final List<Map<String, String>> posts;
 
-class _FreeBoardPageState extends State<FreeBoardPage> {
-  List<Map<String, String>> posts = [];
+  FreeBoardPage({required this.posts});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +23,33 @@ class _FreeBoardPageState extends State<FreeBoardPage> {
                   final post = posts[index];
                   return Card(
                     child: ListTile(
-                      title: Text(post['title']!),
-                      subtitle: Text(post['content']!),
+                      title: Text(
+                        post['title']!, // 제목
+                        maxLines: 1, // 한 줄로 표시
+                        overflow: TextOverflow.ellipsis, // 넘칠 경우 ...으로 표시
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post['content']!, // 내용
+                            maxLines: 1, // 한 줄로 표시
+                            overflow: TextOverflow.ellipsis, // 넘칠 경우 ...으로 표시
+                          ),
+                          SizedBox(height: 8), // 내용과 좋아요/댓글 사이 간격
+                          Row(
+                            children: [
+                              Icon(Icons.thumb_up, size: 18), // 좋아요 아이콘 크기 조정
+                              SizedBox(width: 4), // 아이콘과 숫자 사이 간격
+                              Text('0'), // 좋아요 개수
+                              SizedBox(width: 16), // 좋아요와 댓글 사이 간격
+                              Icon(Icons.comment, size: 18), // 댓글 아이콘 크기 조정
+                              SizedBox(width: 4), // 아이콘과 숫자 사이 간격
+                              Text('0'), // 댓글 개수
+                            ],
+                          ),
+                        ],
+                      ),
                       onTap: () {
                         // Handle post tap
                       },
@@ -39,23 +60,6 @@ class _FreeBoardPageState extends State<FreeBoardPage> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => WritePostPage()),
-          );
-          if (result != null && result['board'] == '자유 게시판') {
-            setState(() {
-              posts.add({
-                'title': result['title'],
-                'content': result['content'],
-              });
-            });
-          }
-        },
-        child: Icon(Icons.add),
       ),
     );
   }

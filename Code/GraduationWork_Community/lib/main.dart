@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'write_post.dart';
-import 'freeboard.dart'; // 자유 게시판 페이지
-import 'goalshareboard.dart'; // 목표 공유 게시판 페이지
-import 'sdtipboard.dart'; // 자기계발 팁 게시판 페이지
-import 'mentoringboard.dart'; // 멘토링 요청 게시판 페이지
-import 'promotionboard.dart'; // 홍보 게시판 페이지
+import 'freeboard.dart';
+import 'goalshareboard.dart';
+import 'sdtipboard.dart';
+import 'mentoringboard.dart';
+import 'promotionboard.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: CommunityMainPage(),
     );
   }
@@ -27,6 +28,15 @@ class CommunityMainPage extends StatefulWidget {
 class _CommunityMainPageState extends State<CommunityMainPage> {
   bool isHotSelected = false;
   bool isMyPostsSelected = false;
+
+  // 게시글 데이터
+  final Map<String, List<Map<String, String>>> boardPosts = {
+    '자유 게시판': [],
+    '목표 공유 게시판': [],
+    '자기계발 팁 게시판': [],
+    '멘토링 요청 게시판': [],
+    '홍보 게시판': [],
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -103,36 +113,11 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
             Expanded(
               child: ListView(
                 children: [
-                  buildListTile('자유 게시판', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => FreeBoardPage()),
-                    );
-                  }),
-                  buildListTile('목표 공유 게시판', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => GoalShareBoard()), // 목표 공유 게시판으로 이동
-                    );
-                  }),
-                  buildListTile('자기계발 팁 게시판', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SdTipBoardPage()),  // 자기계발 팁 게시판으로 이동
-                    );
-                  }),
-                  buildListTile('멘토링 요청 게시판', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MentoringBoardPage()),  // 멘토링 요청 게시판으로 이동
-                    );
-                  }),
-                  buildListTile('홍보 게시판', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => PromotionBoardPage()),  // 홍보 게시판으로 이동
-                    );
-                  }),
+                  buildListTile('자유 게시판', FreeBoardPage(posts: boardPosts['자유 게시판']!)),
+                  buildListTile('목표 공유 게시판', GoalShareBoardPage(posts: boardPosts['목표 공유 게시판']!)),
+                  buildListTile('자기계발 팁 게시판', SdTipBoardPage(posts: boardPosts['자기계발 팁 게시판']!)),
+                  buildListTile('멘토링 요청 게시판', MentoringBoardPage(posts: boardPosts['멘토링 요청 게시판']!)),
+                  buildListTile('홍보 게시판', PromotionBoardPage(posts: boardPosts['홍보 게시판']!)),
                 ],
               ),
             ),
@@ -140,23 +125,35 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WritePostPage()),
           );
+          if (result != null && result['board'] != null) {
+            setState(() {
+              boardPosts[result['board']]!.add({
+                'title': result['title'],
+                'content': result['content'],
+              });
+            });
+          }
         },
         child: Icon(Icons.add),
       ),
     );
   }
 
-  // ListTile을 만들어주는 함수
-  ListTile buildListTile(String title, Function onTap) {
+  ListTile buildListTile(String title, Widget page) {
     return ListTile(
       title: Text(title),
-      trailing: Icon(Icons.arrow_forward),
-      onTap: () => onTap(),
+      trailing: Icon(Icons.chevron_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => page),
+        );
+      },
     );
   }
 }

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'write_post.dart';
 
-class MentoringBoardPage extends StatefulWidget {
-  @override
-  _MentoringBoardPageState createState() => _MentoringBoardPageState();
-}
+class MentoringBoardPage extends StatelessWidget {
+  final List<Map<String, String>> posts;
 
-class _MentoringBoardPageState extends State<MentoringBoardPage> {
-  List<Map<String, String>> posts = [];
+  MentoringBoardPage({required this.posts});
 
   @override
   Widget build(BuildContext context) {
@@ -15,47 +11,63 @@ class _MentoringBoardPageState extends State<MentoringBoardPage> {
       appBar: AppBar(
         title: Text('멘토링 요청 게시판'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: _buildBoard(posts),
+    );
+  }
+
+  Widget _buildBoard(List<Map<String, String>> posts) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return _buildPostItem(post);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostItem(Map<String, String> post) {
+    return Card(
+      child: ListTile(
+        title: Text(
+          post['title']!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(post['title']!),
-                      subtitle: Text(post['content']!),
-                      onTap: () {
-                        // Handle post tap
-                      },
-                    ),
-                  );
-                },
-              ),
+            Text(
+              post['content']!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.thumb_up, size: 18),
+                SizedBox(width: 4),
+                Text('0'),
+                SizedBox(width: 16),
+                Icon(Icons.comment, size: 18),
+                SizedBox(width: 4),
+                Text('0'),
+              ],
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => WritePostPage()),
-          );
-          if (result != null && result['board'] == '멘토링 요청 게시판') {
-            setState(() {
-              posts.add({
-                'title': result['title'],
-                'content': result['content'],
-              });
-            });
-          }
+        onTap: () {
+          // Handle post tap
         },
-        child: Icon(Icons.add),
       ),
     );
   }
