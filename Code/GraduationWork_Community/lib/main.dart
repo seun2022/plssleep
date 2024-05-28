@@ -5,6 +5,7 @@ import 'goalshareboard.dart';
 import 'sdtipboard.dart';
 import 'mentoringboard.dart';
 import 'promotionboard.dart';
+import 'hotboard.dart'; // 새로운 hotboard.dart 파일을 임포트
 
 void main() {
   runApp(MyApp());
@@ -30,13 +31,20 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
   bool isMyPostsSelected = false;
 
   // 게시글 데이터
-  final Map<String, List<Map<String, String>>> boardPosts = {
+  final Map<String, List<Map<String, dynamic>>> boardPosts = {
     '자유 게시판': [],
     '목표 공유 게시판': [],
     '자기계발 팁 게시판': [],
     '멘토링 요청 게시판': [],
     '홍보 게시판': [],
   };
+
+  List<Map<String, dynamic>> getHotPosts() {
+    return boardPosts.values
+        .expand((posts) => posts)
+        .where((post) => post['likes'] >= 10)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +54,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            // Add your onPressed code here!
+            // 여기에 onPressed 코드 추가
           },
         ),
       ),
@@ -63,6 +71,10 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         isHotSelected = true;
                         isMyPostsSelected = false;
                       });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => HotBoardPage(posts: getHotPosts())),
+                      );
                     },
                     child: Container(
                       padding: EdgeInsets.all(16),
@@ -89,6 +101,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         isHotSelected = false;
                         isMyPostsSelected = true;
                       });
+                      // 내 글 페이지로 이동
                     },
                     child: Container(
                       padding: EdgeInsets.all(16),
@@ -135,6 +148,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               boardPosts[result['board']]!.add({
                 'title': result['title'],
                 'content': result['content'],
+                'likes': 0, // 좋아요를 0으로 초기화
               });
             });
           }
